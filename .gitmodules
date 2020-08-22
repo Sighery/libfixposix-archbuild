@@ -1,0 +1,3 @@
+[submodule "libfixposix"]
+	path = libfixposix
+	url = https://aur.archlinux.org/libfixposix.git

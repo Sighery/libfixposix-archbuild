@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: 'sighery/archbuilder:latest'
+
+    steps:
+      - name: Permissions hack
+        run: chown -R builder .
+
+      - name: Install git
+        run: pacman -S --needed --noconfirm git
+
+      - uses: actions/checkout@v2
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Remove PKGDEST from /etc/makepkg.conf
+        run: sed -i '/^PKGDEST=/ d' /etc/makepkg.conf
+
+      - name: Fetch pkgname
+        working-directory: libfixposix
+        run: |
+          pkgname=`sed -n 's/^pkgname=\(.\+\)/\1/p' < PKGBUILD`
+          echo "::set-env name=PKGNAME::${pkgname}"
+
+      - name: Build package
+        working-directory: libfixposix
+        run: |
+          chown -R builder .
+          sudo -u builder bash -c 'makepkg --syncdeps --needed --noconfirm'
+
+      - name: Tar package
+        working-directory: libfixposix
+        run: tar -czvf ${{ env.PKGNAME }}.tar.gz ${{ env.PKGNAME }}-*.pkg.tar.*
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PKGNAME }}
+          path: ${{ env.PKGNAME}}/${{ env.PKGNAME }}.tar.gz
+          if-no-files-found: error
