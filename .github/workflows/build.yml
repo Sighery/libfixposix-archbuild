@@ -30,7 +30,7 @@ jobs:
       - name: Fetch pkgname
         working-directory: libfixposix
         run: |
-          pkgname=`sed -n 's/^pkgname=\(.\+\)/\1/p' < PKGBUILD`
+          source ./PKGBUILD
           echo "::set-env name=PKGNAME::${pkgname}"
 
       - name: Build package
