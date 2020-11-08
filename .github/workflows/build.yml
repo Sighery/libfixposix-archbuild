@@ -34,7 +34,7 @@ jobs:
         working-directory: libfixposix
         run: |
           source ./PKGBUILD
-          echo "::set-env name=PKGNAME::${pkgname}"
+          echo "PKGNAME=${pkgname}" >> $GITHUB_ENV
 
       - name: Build package
         working-directory: libfixposix
